@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>JSAPI TOC Demo</title>
+
+<link rel="stylesheet" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/claro/claro.css" />
+<link rel="stylesheet" href="http://js.arcgis.com/3.7/js/esri/css/esri.css" />
+
+
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #toc {
+            width: 225px;
+            float: left;
+            border: 1px solid black;
+            padding:15px;
+        }
+    </style>
+
+
+    <script>
+        var djConfig = {
+            parseOnLoad: true,
+            packages: [{
+                "name": "custom",
+                "location": '/dijits/toc'
+            }]
+        };
+    </script>
+
+    <script src="http://js.arcgis.com/3.7/"></script>
+
+
+
+    <script>
+
+    require(["esri/map",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
+        "custom/toc",
+        "dojo/dom",
+        "dojo/on",
+        "dojo/domReady!"],
+    function (Map,
+        ArcGISDynamicMapServiceLayer,
+        TOC,
+        dom,
+        on
+        ) {
+
+        var toc;
+
+        var map = new Map("map", {
+            basemap: "topo",
+            center: [-116.152191, 34.000434],
+            zoom: 10,
+            sliderStyle: "small"
+        });
+
+        map.on("load", function () {
+
+            // -- Add the TOC
+            var serviceLayer = new ArcGISDynamicMapServiceLayer("http://sampleserver5.arcgisonline.com/ArcGIS/rest/services/LocalGovernment/Recreation/MapServer");
+            toc = new TOC({
+                map: map,
+                serviceLayer: serviceLayer
+            }, dom.byId("toc"));
+
+
+        });
+
+
+        on(dom.byId("button"), 'click', function (evt) {
+            toc.showLayers();
+        });
+
+    });
+
+
+
+
+
+
+
+
+    </script>
+
+
+</head>
+<body class="claro">
+    
+
+    <button id="button">Add Layers</button>
+    <div>
+        <div id="toc"></div>
+        <div id="map"></div>
+    </div>
+
+</body>
+</html>
