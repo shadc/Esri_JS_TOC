@@ -23,18 +23,18 @@
 
 
     <script>
+        var path = window.location.href.substr(0, location.href.lastIndexOf("/") + 1)
+        console.log(path);
         var djConfig = {
             parseOnLoad: true,
             packages: [{
                 "name": "custom",
-                "location": '/dijits/toc'
+                "location":  path + 'dijits/toc'
             }]
         };
     </script>
 
     <script src="http://js.arcgis.com/3.7/"></script>
-
-
 
     <script>
 
@@ -61,7 +61,6 @@
         });
 
         map.on("load", function () {
-
             // -- Add the TOC
             var serviceLayer = new ArcGISDynamicMapServiceLayer("http://sampleserver5.arcgisonline.com/ArcGIS/rest/services/LocalGovernment/Recreation/MapServer");
             toc = new TOC({
@@ -69,29 +68,18 @@
                 serviceLayer: serviceLayer
             }, dom.byId("toc"));
 
+            on(dom.byId("button"), 'click', function (evt) {
+                toc.showLayers();
+            });
 
         });
-
-
-        on(dom.byId("button"), 'click', function (evt) {
-            toc.showLayers();
-        });
-
     });
-
-
-
-
-
-
-
-
     </script>
 
 
 </head>
+
 <body class="claro">
-    
 
     <button id="button">Add Layers</button>
     <div>

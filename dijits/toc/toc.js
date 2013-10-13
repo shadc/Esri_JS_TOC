@@ -9,14 +9,27 @@ define([
     "dijit/form/HorizontalSlider",
     "dijit/Dialog",
     "dojo/on",
-    "dojo/_base/connect",
     "dojo/dom-construct",
     "dijit/form/CheckBox",
     "dojox/storage",
     "dojox/json/query",
     "esri/layers/ArcGISDynamicMapServiceLayer",
     "esri/request"
-], function (declare, _WidgetBase, _TemplatedMixin, parser, dom, array, HorizontalSlider, Dialog, on, conn, domConstruct, CheckBox, storage, query, ArcGISDynamicMapServiceLayer, esriRequest) {
+], function (declare,
+    _WidgetBase,
+    _TemplatedMixin,
+    parser,
+    dom,
+    array,
+    HorizontalSlider,
+    Dialog,
+    on,
+    domConstruct,
+    CheckBox,
+    storage,
+    query,
+    ArcGISDynamicMapServiceLayer,
+    esriRequest) {
 
     parser.parse();
 
@@ -74,9 +87,6 @@ define([
         constructor: function (params) {
             declare.safeMixin(this, params);
             this.storageProvider = dojox.storage.manager.getProvider()
-            conn.connect(this.map, 'onZoomEnd', this, this._setTOCstyle);
-
-
         },
         // extension point. called automatically after widget DOM ready.
         postCreate: function () {
@@ -96,9 +106,15 @@ define([
             this.serviceLayer.setVisibleLayers([-1]);
             this.storageProvider.initialize();
             
+            var me = this;
+            on(this.map, 'zoom-end', function () {
+                me._setTOCstyle();
+            });
+
+
         },
         _makeTOC: function () {
-            var self = this;
+            var me = this;
 
             //-- Create a Dialog with available layers to choose from
             this.dialog = new Dialog({
@@ -109,9 +125,9 @@ define([
             on(this.dialog, 'click', function (evt) {
                 if (evt.target.type === 'checkbox') {
                     if (evt.target.checked) {
-                        self._addToTOC(evt.target);
+                        me._addToTOC(evt.target);
                     } else {
-                        self._removeFromTOC(evt.target);
+                        me._removeFromTOC(evt.target);
                     };
                 }
             });
@@ -119,9 +135,9 @@ define([
             on(this.domNode, 'click', function (evt) {
                 if (evt.target.type === 'checkbox') {
                     if (evt.target.checked) {
-                        self._showOnMap(evt.target);
+                        me._showOnMap(evt.target);
                     } else {
-                        self._hideOnMap(evt.target);
+                        me._hideOnMap(evt.target);
                     };
                 }
             });
@@ -138,11 +154,11 @@ define([
                 style: "width:200px;",
                 onChange: function (value) {
                     var newOp = (value / 100);
-                    self.opacityLayer.setOpacity(1 - newOp);
+                    me.opacityLayer.setOpacity(1 - newOp);
                     dom.byId("uxSliderValue").innerHTML = Math.round(value) + '%';
                     if (dojo.isIE <= 10) {
                         clearTimeout(IESliderTimeout);
-                        IESliderTimeout = setTimeout(function () { self.opacityLayer.refresh(); }, 500);
+                        IESliderTimeout = setTimeout(function () { me.opacityLayer.refresh(); }, 500);
                     } // IE fix for slider opacity not working.
                 }
             });
@@ -154,7 +170,7 @@ define([
         },
         _getServiceLayers: function () {
 
-            var self = this;
+            var me = this;
             var url = this.serviceLayer.url + '/layers';
             var layersRequest = esriRequest({
                 url: url,
@@ -164,10 +180,10 @@ define([
             });
             layersRequest.then(
                function (response) {
-                   var tocLayers = self.storageProvider.get("dialTOCLayers");
+                   var tocLayers = me.storageProvider.get("dialTOCLayers");
                    if (tocLayers == null) tocLayers = [];
 
-                   var visLayers = self.storageProvider.get("dialVisLayers");
+                   var visLayers = me.storageProvider.get("dialVisLayers");
                    if (visLayers == null) visLayers = [];
 
                    var div = domConstruct.create("div", {style: "width:300px;"});
@@ -181,22 +197,22 @@ define([
                            lyr.isVis = (array.indexOf(visLayers, lyr.name) > -1) ? true : false;
                            var DialogNode = new _DialogNode(lyr.name, lyr.id, lyr.inTOC);
                            DialogNode.placeAt(div, "last");
-                           self.layers.push(lyr);
+                           me.layers.push(lyr);
                        }
                    });
-                   self.dialog.set("content", div);
+                   me.dialog.set("content", div);
 
                    //-- Create the TOC
-                   var layersForToc = array.filter(self.layers, function (item) { return item.inTOC == true; }).sort(function (a, b) {
+                   var layersForToc = array.filter(me.layers, function (item) { return item.inTOC == true; }).sort(function (a, b) {
                        return (a.id > b.id) ? 1 : -1;
                    });
 
                    array.forEach(layersForToc, function (lyr) {
                        var TOCnode = new _TOCnode(lyr.name, lyr.id, lyr.isVis);
-                       TOCnode.placeAt(self.tocDomNode, "last");
+                       TOCnode.placeAt(me.tocDomNode, "last");
                    });
 
-                   self._setVisLayers();
+                   me._setVisLayers();
 
                }, function (error) {
                    console.log("Error: ", error.message);
@@ -251,8 +267,7 @@ define([
             layer.isVis = false;
             this._setVisLayers();
         },
-        _setTOCstyle: function (extent, zoomFactor, anchor, level) {
-
+        _setTOCstyle: function (e) {
             var layers = this.layers;
             var mapScale = this.map.getScale();
             var serviceLayer = this.serviceLayer;
@@ -293,7 +308,6 @@ define([
         },
         _setVisLayers: function () {
             //-- Add/Remove visible items to the map
-            var self = this;
             var mapVisLayers = array.filter(this.layers, function (item) { return item.isVis == true; });
             var mapVisIndexes = [-1];
             var mapOpIndexes = [-1];
