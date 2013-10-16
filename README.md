@@ -1,8 +1,8 @@
-Table of Contents with Add/Remove layers widget  for the Esri JavaScript API
+## Table of Contents with Add/Remove layers widget  for the Esri JavaScript API
 
 ===========
 
-## Putting this out there hoping that people will contribute to it's development.  Please fork and contribute!!
+Please fork and contribute!!
 
 * Allow users to Add/Remove layers to a table of contents. 
 * dojoX/storage (HTML 5 local storage/cookies) is used to persist the added and visible layers.
@@ -25,3 +25,4 @@ Created By [shadcampbell](https://github.com/shadcampbell)
 
 
 ## Known Issues
++-
